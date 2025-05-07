@@ -96,4 +96,4 @@ def compute_next_occurrence():
     return jsonify({"error": "Could not compute next occurrence"}), 400
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='localhost', port=1717)
