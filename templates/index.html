@@ -6,504 +6,7 @@
     <title>To-Do Scheduler</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
-    <style>
-        :root {
-            --primary: #4a6fa5;
-            --primary-light: #6b8bb5;
-            --secondary: #f5f5f5;
-            --accent: #5d8fdb;
-            --danger: #e74c3c;
-            --success: #27ae60;
-            --dark: #333;
-            --light: #fff;
-            --gray: #ccc;
-            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        body {
-            background-color: #f9fbfd;
-            color: var(--dark);
-            min-height: 100vh;
-        }
-        
-        .container {
-            max-width: 80%;
-            margin: 0 auto;
-            padding: 2rem 1rem;
-        }
-        
-        header {
-            background-color: var(--primary);
-            color: var(--light);
-            padding: 0.25rem 0;
-            box-shadow: var(--shadow);
-        }
-        
-        header h1 {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            font-weight: 600;
-        }
-        
-        main {
-            display: grid;
-            grid-template-columns: 300px 1fr;
-            gap: 2rem;
-            margin-top: 2rem;
-        }
-        
-        @media (max-width: 768px) {
-            main {
-                grid-template-columns: 1fr;
-            }
-        }
-        
-        .sidebar {
-            background-color: var(--light);
-            padding: 1.5rem;
-            border-radius: 8px;
-            box-shadow: var(--shadow);
-            height: fit-content;
-        }
-        
-        .task-form {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-        
-        .task-form h2 {
-            margin-bottom: 1rem;
-            font-size: 1.25rem;
-            border-bottom: 2px solid var(--primary-light);
-            padding-bottom: 0.5rem;
-            color: var(--primary);
-        }
-        
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-        
-        label {
-            font-weight: 500;
-            font-size: 0.9rem;
-            color: var(--dark);
-        }
-        
-        input, select, textarea {
-            padding: 0.75rem;
-            border: 1px solid var(--gray);
-            border-radius: 4px;
-            font-size: 1rem;
-            outline: none;
-            transition: border 0.2s;
-        }
-        
-        input:focus, select:focus, textarea:focus {
-            border-color: var(--accent);
-        }
-        
-        .checkbox-group {
-            display: flex;
-            gap: 0.5rem;
-            align-items: center;
-        }
-        
-        .checkbox-group input {
-            width: auto;
-        }
-        
-        .weekday-selector {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-            gap: 0.5rem;
-            margin-top: 0.5rem;
-        }
-        
-        .weekday-btn {
-            padding: 0.5rem;
-            border: 1px solid var(--gray);
-            border-radius: 4px;
-            cursor: pointer;
-            text-align: center;
-            font-size: 0.85rem;
-            transition: all 0.2s;
-        }
-        
-        .weekday-btn.selected {
-            background-color: var(--primary);
-            color: var(--light);
-            border-color: var(--primary);
-        }
-        
-        .btn {
-            padding: 0.75rem 1rem;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: 500;
-            transition: all 0.2s;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-        }
-        
-        .btn-primary {
-            background-color: var(--primary);
-            color: var(--light);
-        }
-        
-        .btn-primary:hover {
-            background-color: var(--primary-light);
-        }
-        
-        .btn-danger {
-            background-color: var(--danger);
-            color: var(--light);
-        }
-        
-        .btn-danger:hover {
-            background-color: #c0392b;
-        }
-        
-        .btn-success {
-            background-color: var(--success);
-            color: var(--light);
-        }
-        
-        .btn-success:hover {
-            background-color: #219653;
-        }
-        
-        .tasks-container {
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-        }
-        
-        .tasks-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-        
-        .tasks-header h2 {
-            font-size: 1.5rem;
-            color: var(--primary);
-        }
-        
-        .filter-controls {
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-        }
-        
-        .day-selector {
-            display: flex;
-            gap: 0.5rem;
-            overflow-x: auto;
-            padding-bottom: 0.5rem;
-        }
-        
-        .day-btn {
-            padding: 0.5rem 1rem;
-            border: 1px solid var(--gray);
-            border-radius: 4px;
-            cursor: pointer;
-            white-space: nowrap;
-            transition: all 0.2s;
-        }
-        
-        .day-btn.active {
-            background-color: var(--primary);
-            color: var(--light);
-            border-color: var(--primary);
-        }
-        
-        .task-list {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-        
-        .task-card {
-            background-color: var(--light);
-            border-radius: 8px;
-            box-shadow: var(--shadow);
-            padding: 1.5rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        
-        .task-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-        }
-        
-        .task-card.completed {
-            border-left: 4px solid var(--success);
-        }
-        
-        .task-card.incomplete {
-            border-left: 4px solid var(--danger);
-        }
-        
-        .task-content {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-            flex: 1;
-        }
-        
-        .task-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-        }
-        
-        .task-completed .task-title {
-            text-decoration: line-through;
-            color: #888;
-        }
-        
-        .task-details {
-            display: flex;
-            gap: 1rem;
-            font-size: 0.9rem;
-            color: #666;
-        }
-        
-        .task-details span {
-            display: flex;
-            align-items: center;
-            gap: 0.25rem;
-        }
-        
-        .task-description {
-            margin-top: 0.5rem;
-            font-size: 0.95rem;
-            color: #444;
-        }
-        
-        .task-actions {
-            display: flex;
-            gap: 0.5rem;
-        }
-        
-        .action-btn {
-            width: 36px;
-            height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 4px;
-            border: none;
-            cursor: pointer;
-            transition: all 0.2s;
-            background-color: var(--secondary);
-        }
-        
-        .action-btn:hover {
-            background-color: #e9e9e9;
-        }
-        
-        .action-btn.edit {
-            color: var(--primary);
-        }
-        
-        .action-btn.delete {
-            color: var(--danger);
-        }
-        
-        .action-btn.complete {
-            color: var(--success);
-        }
-        
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s;
-        }
-        
-        .modal.active {
-            opacity: 1;
-            visibility: visible;
-        }
-        
-        .modal-content {
-            background-color: var(--light);
-            padding: 2rem;
-            border-radius: 8px;
-            width: 90%;
-            max-width: 500px;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-            transform: translateY(-20px);
-            transition: transform 0.3s;
-        }
-        
-        .modal.active .modal-content {
-            transform: translateY(0);
-        }
-        
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-        }
-        
-        .modal-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: var(--primary);
-        }
-        
-        .close-modal {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: #999;
-            transition: color 0.2s;
-        }
-        
-        .close-modal:hover {
-            color: var(--danger);
-        }
-        
-        .modal-footer {
-            display: flex;
-            justify-content: flex-end;
-            gap: 1rem;
-            margin-top: 1.5rem;
-        }
-        
-        .badge {
-            display: inline-block;
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            font-weight: 500;
-        }
-        
-        .badge-recurring {
-            background-color: #e1f5fe;
-            color: #0288d1;
-        }
-        
-        .notification {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background-color: var(--dark);
-            color: var(--light);
-            padding: 1rem;
-            border-radius: 4px;
-            box-shadow: var(--shadow);
-            z-index: 1000;
-            opacity: 0;
-            transform: translateY(10px);
-            transition: opacity 0.3s, transform 0.3s;
-        }
-        
-        .notification.active {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        
-        .notification.success {
-            background-color: var(--success);
-        }
-        
-        .notification.error {
-            background-color: var(--danger);
-        }
-        
-        .empty-state {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 4rem 2rem;
-            text-align: center;
-            background-color: var(--light);
-            border-radius: 8px;
-            box-shadow: var(--shadow);
-        }
-        
-        .empty-state i {
-            font-size: 3rem;
-            color: #ddd;
-            margin-bottom: 1rem;
-        }
-        
-        .empty-state h3 {
-            font-size: 1.25rem;
-            color: #888;
-            margin-bottom: 0.5rem;
-        }
-        
-        .empty-state p {
-            color: #aaa;
-            margin-bottom: 1.5rem;
-        }
-        
-        .spinner {
-            display: inline-block;
-            width: 80px;
-            height: 80px;
-            margin: 2rem auto;
-        }
-        
-        .spinner:after {
-            content: " ";
-            display: block;
-            width: 64px;
-            height: 64px;
-            margin: 8px;
-            border-radius: 50%;
-            border: 6px solid var(--primary);
-            border-color: var(--primary) transparent var(--primary) transparent;
-            animation: spin 1.2s linear infinite;
-        }
-        
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-        
-        .hidden {
-            display: none !important;
-        }
-    </style>
+    <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
     <header>
@@ -599,18 +102,32 @@
                     <button class="day-btn active" data-date="all">All Days</button>
                     <!-- Day buttons will be added here dynamically -->
                 </div>
-
-                <div id="emptyState" class="empty-state hidden">
-                    <i class="fas fa-tasks"></i>
-                    <h3>No Tasks Found</h3>
-                    <p>Add a new task to get started!</p>
-                </div>
                 
                 <div id="taskList" class="task-list">
                     <!-- Tasks will be added here dynamically -->
                     <div class="spinner" id="loadingSpinner"></div>
                 </div>
                 
+                <div class="pagination-container" id="paginationContainer">
+                    <div class="pagination-controls">
+                        <button id="prevPageBtn" class="pagination-btn" disabled>
+                            <i class="fas fa-chevron-left"></i> Previous
+                        </button>
+                        <span id="pageIndicator">Page 1 of 1</span>
+                        <button id="nextPageBtn" class="pagination-btn" disabled>
+                            Next <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="emptyState" class="empty-state hidden">
+                    <i class="fas fa-tasks"></i>
+                    <h3>No Tasks Found</h3>
+                    <p>Add a new task to get started!</p>
+                    <button class="btn btn-primary" id="addFirstTaskBtn">
+                        <i class="fas fa-plus"></i> Add Your First Task
+                    </button>
+                </div>
             </section>
         </main>
     </div>
@@ -640,6 +157,9 @@
             let activeDateFilter = 'all';
             let taskBeingEdited = null;
             let taskToDelete = null;
+            let currentPage = 1;
+            let itemsPerPage = 10;
+            let totalPages = 1;
             
             const API_URL = '/api/tasks';
             const taskForm = document.getElementById('taskForm');
@@ -652,6 +172,10 @@
             const notification = document.getElementById('notification');
             const daySelector = document.querySelector('.day-selector');
             const filterStatus = document.getElementById('filterStatus');
+            const paginationContainer = document.getElementById('paginationContainer');
+            const prevPageBtn = document.getElementById('prevPageBtn');
+            const nextPageBtn = document.getElementById('nextPageBtn');
+            const pageIndicator = document.getElementById('pageIndicator');
             
             const taskIdField = document.getElementById('taskId');
             const titleField = document.getElementById('title');
@@ -691,7 +215,23 @@
                 // Filter events
                 filterStatus.addEventListener('change', () => {
                     activeFilter = filterStatus.value;
+                    currentPage = 1;
                     renderTasks();
+                });
+                
+                // Pagination events
+                prevPageBtn.addEventListener('click', () => {
+                    if (currentPage > 1) {
+                        currentPage--;
+                        renderTasks();
+                    }
+                });
+                
+                nextPageBtn.addEventListener('click', () => {
+                    if (currentPage < totalPages) {
+                        currentPage++;
+                        renderTasks();
+                    }
                 });
                 
                 // Modal events
@@ -757,9 +297,28 @@
                 // Render tasks or empty state
                 if (filteredTasks.length === 0) {
                     emptyState.classList.remove('hidden');
+                    paginationContainer.classList.add('hidden');
                 } else {
                     emptyState.classList.add('hidden');
-                    filteredTasks.forEach(renderTaskCard);
+                    
+                    // Handle pagination
+                    totalPages = Math.ceil(filteredTasks.length / itemsPerPage);
+                    
+                    // Adjust current page if it's now out of bounds
+                    if (currentPage > totalPages) {
+                        currentPage = totalPages;
+                    }
+                    
+                    // Update pagination controls
+                    updatePaginationControls();
+                    
+                    // Get current page items
+                    const startIndex = (currentPage - 1) * itemsPerPage;
+                    const endIndex = Math.min(startIndex + itemsPerPage, filteredTasks.length);
+                    const currentPageItems = filteredTasks.slice(startIndex, endIndex);
+                    
+                    // Render current page items
+                    currentPageItems.forEach(renderTaskCard);
                 }
             }
             
@@ -1135,6 +694,7 @@
                         document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active'));
                         btn.classList.add('active');
                         activeDateFilter = date;
+                        currentPage = 1; // Reset to first page when changing filters
                         renderTasks();
                     });
                     
@@ -1146,6 +706,7 @@
                     document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active'));
                     allDaysBtn.classList.add('active');
                     activeDateFilter = 'all';
+                    currentPage = 1; // Reset to first page when changing filters
                     renderTasks();
                 });
             }
@@ -1163,18 +724,36 @@
             }
             
             function formatDate(dateString) {
-                // Create date with time set to noon to avoid timezone issues
-                const date = new Date(`${dateString}T12:00:00`);
+                // Create date object by using the ISO date format
+                // Fix timezone issue by parsing the date string and creating a new Date object with components
+                const [year, month, day] = dateString.split('-').map(num => parseInt(num, 10));
+                const date = new Date(year, month - 1, day); // month is 0-indexed in JavaScript
+                
                 const options = { weekday: 'short', month: 'short', day: 'numeric' };
                 return date.toLocaleDateString('en-US', options);
             }
             
             function formatDateForInput(date) {
-                // Use UTC methods to avoid timezone issues
-                const year = date.getUTCFullYear();
-                const month = String(date.getUTCMonth() + 1).padStart(2, '0');
-                const day = String(date.getUTCDate()).padStart(2, '0');
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
                 return `${year}-${month}-${day}`;
+            }
+            
+            function updatePaginationControls() {
+                // Update page indicator
+                pageIndicator.textContent = `Page ${currentPage} of ${totalPages}`;
+                
+                // Enable/disable prev/next buttons
+                prevPageBtn.disabled = currentPage <= 1;
+                nextPageBtn.disabled = currentPage >= totalPages;
+                
+                // Show/hide pagination container
+                if (totalPages <= 1) {
+                    paginationContainer.classList.add('hidden');
+                } else {
+                    paginationContainer.classList.remove('hidden');
+                }
             }
         });
     </script>
