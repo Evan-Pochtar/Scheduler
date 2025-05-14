@@ -533,17 +533,28 @@
             }
             
             function computeNextOccurrence(task) {
+                if (!task || !task.recurrence_type || !task.recurrence_value || !task.date) {
+                    console.error('Invalid task data for creating next occurrence:', task);
+                    showNotification('Error creating next task occurrence. Missing task data.', 'error');
+                    return;
+                }
+
                 fetch('/api/compute-next-occurrence', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(task)
                 })
-                    .then(response => response.json())
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`Server responded with ${response.status}`);
+                        }
+                        return response.json();
+                    })
                     .then(data => {
                         if (data.next_date) {
                             const newTask = {
                                 title: task.title,
-                                description: task.description,
+                                description: task.description || '',
                                 date: data.next_date,
                                 completed: false,
                                 recurring: task.recurring,
@@ -551,23 +562,34 @@
                                 recurrence_value: task.recurrence_value
                             };
                             
+                            // Log the new task for debugging
+                            console.log('Creating next occurrence task:', JSON.stringify(newTask));
+                            
                             // Create the next occurrence
-                            fetch(API_URL, {
+                            return fetch(API_URL, {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify(newTask)
-                            })
-                                .then(response => response.json())
-                                .then(nextTask => {
-                                    tasks.push(nextTask);
-                                    renderTasks();
-                                    updateDaySelector();
-                                    showNotification('Next occurrence created!', 'success');
-                                });
+                            });
+                        } else {
+                            throw new Error('No next date returned from server');
                         }
                     })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`Server responded with ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(nextTask => {
+                        tasks.push(nextTask);
+                        renderTasks();
+                        updateDaySelector();
+                        showNotification('Next occurrence created!', 'success');
+                    })
                     .catch(error => {
-                        console.error('Error computing next occurrence:', error);
+                        console.error('Error in next occurrence workflow:', error);
+                        showNotification('Failed to create next task occurrence. Please try again.', 'error');
                     });
             }
             
