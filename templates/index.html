@@ -161,6 +161,8 @@
             let currentPage = 1;
             let itemsPerPage = 10;
             let totalPages = 1;
+            let dayCurrentPage = 1;
+            const daysPerPage = 7;
             
             const API_URL = '/api/tasks';
             const taskForm = document.getElementById('taskForm');
@@ -332,8 +334,8 @@
                 
                 let recurrenceText = '';
                 let recurrenceBadge = '';
-                
-                if (task.recurring) {
+
+                if (task.recurring === "True") {
                     if (task.recurrence_type === 'days') {
                         recurrenceText = `<span><i class="fas fa-sync-alt"></i> Every ${task.recurrence_value} day(s)</span>`;
                     } else if (task.recurrence_type === 'weekdays') {
@@ -689,21 +691,74 @@
             }
             
             function updateDaySelector() {
-                // Clear all date buttons except 'All Days'
-                const allDaysBtn = daySelector.querySelector('.day-btn[data-date="all"]');
+                // Clear all buttons
                 daySelector.innerHTML = '';
+                
+                // Add "All Days" button
+                const allDaysBtn = document.createElement('button');
+                allDaysBtn.className = 'day-btn' + (activeDateFilter === 'all' ? ' active' : '');
+                allDaysBtn.dataset.date = 'all';
+                allDaysBtn.textContent = 'All Days';
                 daySelector.appendChild(allDaysBtn);
                 
+                // Get today, tomorrow and yesterday dates
+                const todayDate = formatDateForInput(new Date());
+                
+                const tomorrowObj = new Date();
+                tomorrowObj.setDate(tomorrowObj.getDate() + 1);
+                const tomorrowDate = formatDateForInput(tomorrowObj);
+                
+                const yesterdayObj = new Date();
+                yesterdayObj.setDate(yesterdayObj.getDate() - 1);
+                const yesterdayDate = formatDateForInput(yesterdayObj);
+                
+                // Add Today button
+                const todayBtn = document.createElement('button');
+                todayBtn.className = 'day-btn day-special' + (activeDateFilter === todayDate ? ' active' : '');
+                todayBtn.dataset.date = todayDate;
+                todayBtn.textContent = 'Today';
+                daySelector.appendChild(todayBtn);
+                
+                // Add Tomorrow button
+                const tomorrowBtn = document.createElement('button');
+                tomorrowBtn.className = 'day-btn day-special' + (activeDateFilter === tomorrowDate ? ' active' : '');
+                tomorrowBtn.dataset.date = tomorrowDate;
+                tomorrowBtn.textContent = 'Tomorrow';
+                daySelector.appendChild(tomorrowBtn);
+                
+                // Add Yesterday button
+                const yesterdayBtn = document.createElement('button');
+                yesterdayBtn.className = 'day-btn day-special' + (activeDateFilter === yesterdayDate ? ' active' : '');
+                yesterdayBtn.dataset.date = yesterdayDate;
+                yesterdayBtn.textContent = 'Yesterday';
+                daySelector.appendChild(yesterdayBtn);
+                
                 // Get unique dates from tasks
-                const dates = [...new Set(tasks.map(task => task.date))];
+                let dates = [...new Set(tasks.map(task => task.date))];
                 
                 // Sort dates
                 dates.sort((a, b) => {
                     return new Date(a) - new Date(b);
                 });
                 
-                // Create buttons for each date
-                dates.forEach(date => {
+                // Filter out today, tomorrow, and yesterday as they have special buttons
+                dates = dates.filter(date => date !== todayDate && date !== tomorrowDate && date !== yesterdayDate);
+                
+                // Add pagination controls before the day buttons
+                const prevDayPageBtn = document.createElement('button');
+                prevDayPageBtn.className = 'day-pagination-btn';
+                prevDayPageBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
+                prevDayPageBtn.disabled = dayCurrentPage <= 1;
+                daySelector.appendChild(prevDayPageBtn);
+                
+                // Calculate pagination
+                const totalDayPages = Math.ceil(dates.length / daysPerPage);
+                const startIdx = (dayCurrentPage - 1) * daysPerPage;
+                const endIdx = startIdx + daysPerPage;
+                const visibleDates = dates.slice(startIdx, endIdx);
+                
+                // Create buttons for each date in the current page
+                visibleDates.forEach(date => {
                     const btn = document.createElement('button');
                     btn.className = 'day-btn';
                     btn.dataset.date = date;
@@ -713,24 +768,40 @@
                         btn.classList.add('active');
                     }
                     
-                    btn.addEventListener('click', () => {
-                        document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active'));
-                        btn.classList.add('active');
-                        activeDateFilter = date;
-                        currentPage = 1; // Reset to first page when changing filters
-                        renderTasks();
-                    });
-                    
                     daySelector.appendChild(btn);
                 });
                 
-                // Ensure 'All Days' button has event listener
-                allDaysBtn.addEventListener('click', () => {
-                    document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active'));
-                    allDaysBtn.classList.add('active');
-                    activeDateFilter = 'all';
-                    currentPage = 1; // Reset to first page when changing filters
-                    renderTasks();
+                // Add next page button
+                const nextDayPageBtn = document.createElement('button');
+                nextDayPageBtn.className = 'day-pagination-btn';
+                nextDayPageBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
+                nextDayPageBtn.disabled = dayCurrentPage >= totalDayPages || totalDayPages === 0;
+                daySelector.appendChild(nextDayPageBtn);
+                
+                // Add event listeners
+                daySelector.querySelectorAll('.day-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        activeDateFilter = btn.dataset.date;
+                        currentPage = 1; // Reset to first page when changing filters
+                        renderTasks();
+                    });
+                });
+                
+                // Add event listeners for pagination
+                prevDayPageBtn.addEventListener('click', () => {
+                    if (dayCurrentPage > 1) {
+                        dayCurrentPage--;
+                        updateDaySelector();
+                    }
+                });
+                
+                nextDayPageBtn.addEventListener('click', () => {
+                    if (dayCurrentPage < totalDayPages) {
+                        dayCurrentPage++;
+                        updateDaySelector();
+                    }
                 });
             }
             
